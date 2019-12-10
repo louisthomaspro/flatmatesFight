@@ -7,15 +7,20 @@
  *  - Character by 0x72 under CC-0, https://0x72.itch.io/16x16-industrial-tileset
  */
 
+import "../node_modules/phaser/dist/phaser.js";
+import "../node_modules/phaser-matter-collision-plugin/dist/phaser-matter-collision-plugin.js";
 import MainScene from "./main-scene.js";
 
 const config = {
   type: Phaser.AUTO,
   width: 1280,
   height: 720,
+  input: {
+    gamepad: true
+  },
   backgroundColor: "#000c1f",
   parent: "game-container",
-  scene: MainScene,
+  scene: [MainScene],
   pixelArt: true,
   physics: {
     default: "matter",

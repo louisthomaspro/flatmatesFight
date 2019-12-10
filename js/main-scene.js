@@ -27,6 +27,7 @@ export default class MainScene extends Phaser.Scene {
   }
 
   create() {
+
     const map = this.make.tilemap({ key: "map" });
     const tileset = map.addTilesetImage("kenney-tileset-64px-extruded");
     const groundLayer = map.createDynamicLayer("Ground", tileset, 0, 0);
@@ -50,10 +51,10 @@ export default class MainScene extends Phaser.Scene {
     // The spawn point is set using a point object inside of Tiled (within the "Spawn" object layer)
     const { x, y } = map.findObject("Spawn", obj => obj.name === "Spawn Point");
 
-    const { LEFT, RIGHT, UP, Q, D, Z } = Phaser.Input.Keyboard.KeyCodes;
+    const { LEFT, RIGHT, UP, Q, D, Z, A, CTRL } = Phaser.Input.Keyboard.KeyCodes;
 
-    this.player1 = new Player(this, x + 30, y, LEFT, RIGHT, UP);
-    this.player2 = new Player(this, x, y, Q, D, Z);
+    this.player1 = new Player(this, x + 30, y, LEFT, RIGHT, UP, CTRL);
+    this.player2 = new Player(this, x, y, Q, D, Z, A);    
 
     // Smoothly follow the player
     // this.cameras.main.startFollow(this.player.sprite, false, 0.5, 0.5);
@@ -77,7 +78,8 @@ export default class MainScene extends Phaser.Scene {
       // Tiled origin for coordinate system is (0, 1), but we want (0.5, 0.5)
       this.matter.add
         .image(x + width / 2, y - height / 2, "block")
-        .setBody({ shape: "rectangle", density: 0.001 });
+        .setBody({ shape: "rectangle", density: 0.001 })
+        .setData('name', "coucou");
     });
 
     // Create platforms at the point locations in the "Platform Locations" layer created in Tiled
@@ -111,8 +113,23 @@ export default class MainScene extends Phaser.Scene {
       fill: "#000000"
     });
     help.setScrollFactor(0).setDepth(1000);
-  }
 
+
+    this.input.gamepad.once('down', function (pad) {
+      console.log('Playing with ' + pad.id);
+      if (!this.player1.isPadExist()) {
+        this.player1.initPad(pad);
+        return;
+      }
+      if (!this.player2.isPadExist()) {
+        this.player2.initPad(pad);
+        return;
+      }
+      
+    }, this);
+
+  }
+  
   onPlayerCollide({ gameObjectB }) {
     if (!gameObjectB || !(gameObjectB instanceof Phaser.Tilemaps.Tile)) return;
 

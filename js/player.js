@@ -1,8 +1,12 @@
 import MultiKey from "./multi-key.js";
+import Grab from "./grab.js";
 
 export default class Player {
-  constructor(scene, x, y, leftKey, rightKey, upKey) {
+  constructor(scene, x, y, leftKey, rightKey, upKey, grabKey) {
     this.scene = scene;
+
+    this.direction = false; // false: left; right: true
+
 
     // Create the animations we need from the player spritesheet
     const anims = scene.anims;
@@ -45,7 +49,8 @@ export default class Player {
 
     const { Body, Bodies } = Phaser.Physics.Matter.Matter; // Native Matter modules
     const { width: w, height: h } = this.sprite;
-    const mainBody = Bodies.rectangle(0, 0, w * 0.6, h, { chamfer: { radius: 10 } });
+    console.log(w + ":" + h);
+    const mainBody = Bodies.rectangle(0, 0, 20, h, { chamfer: { radius: 10 } });
     this.sensors = {
       bottom: Bodies.rectangle(0, h * 0.5, w * 0.25, 2, { isSensor: true }),
       left: Bodies.rectangle(-w * 0.35, 0, 2, h * 0.5, { isSensor: true }),
@@ -62,6 +67,10 @@ export default class Player {
       .setScale(2)
       .setFixedRotation() // Sets inertia to infinity so the player can't rotate
       .setPosition(x, y);
+
+    this.grab = new Grab(this, scene);
+
+    // scene.matter.add.rectangle(0,0,32,32, {isSensor: true, isStatic: true});
 
     // Track which sensors are touching something
     this.isTouching = { left: false, right: false, ground: false };
@@ -88,6 +97,7 @@ export default class Player {
     this.leftInput = new MultiKey(scene, [leftKey]);
     this.rightInput = new MultiKey(scene, [rightKey]);
     this.jumpInput = new MultiKey(scene, [upKey]);
+    this.grabInput = new MultiKey(scene, [grabKey]);
 
     this.destroyed = false;
     this.scene.events.on("update", this.update, this);
@@ -125,14 +135,42 @@ export default class Player {
     this.sprite.setStatic(true);
   }
 
+  initPad(pad) {
+    console.log('Init pad for player')
+    this.pad = pad;
+  }
+
+  joystickRight() {
+    return (this.pad && this.pad.leftStick.x > 0.75);
+  }
+
+  joystickLeft() {
+    return (this.pad && this.pad.leftStick.x < -0.75);
+  }
+
+  buttonA() {
+    return (this.pad && this.pad.A);
+  }
+
+  buttonB() {
+    return (this.pad && this.pad.B);
+  }
+
+  isPadExist() {
+    return (this.pad ? true : false);
+  }
+
   update() {
+    this.grab.update(this);
     if (this.destroyed) return;
 
     const sprite = this.sprite;
     const velocity = sprite.body.velocity;
-    const isRightKeyDown = this.rightInput.isDown();
-    const isLeftKeyDown = this.leftInput.isDown();
-    const isJumpKeyDown = this.jumpInput.isDown();
+
+    const isRightKeyDown = this.rightInput.isDown() || this.joystickRight();
+    const isLeftKeyDown = this.leftInput.isDown() || this.joystickLeft();
+    const isJumpKeyDown = this.jumpInput.isDown() || this.buttonA();
+    const isGrabKeyDown = this.grabInput.isDown() || this.buttonB();
     const isOnGround = this.isTouching.ground;
     const isInAir = !isOnGround;
 
@@ -147,6 +185,7 @@ export default class Player {
       // Don't let the player push things left if they in the air
       if (!(isInAir && this.isTouching.left)) {
         sprite.applyForce({ x: -moveForce, y: 0 });
+        this.direction = false;
       }
     } else if (isRightKeyDown) {
       sprite.setFlipX(false);
@@ -154,6 +193,7 @@ export default class Player {
       // Don't let the player push things right if they in the air
       if (!(isInAir && this.isTouching.right)) {
         sprite.applyForce({ x: moveForce, y: 0 });
+        this.direction = true;
       }
     }
 
@@ -185,22 +225,40 @@ export default class Player {
       sprite.anims.stop();
       sprite.setTexture("player", 10);
     }
-  }
 
-  destroy() {
-    // Clean up any listeners that might trigger events after the player is officially destroyed
-    this.scene.events.off("update", this.update, this);
-    this.scene.events.off("shutdown", this.destroy, this);
-    this.scene.events.off("destroy", this.destroy, this);
-    if (this.scene.matter.world) {
-      this.scene.matter.world.off("beforeupdate", this.resetTouching, this);
+    if (isGrabKeyDown) {
+      this.grab.gameObject.gameObject;
+      if (this.grab.gameObject.gameObject && !this.grab.isGrabbing) { // si un object est dispo
+        this.grab.isGrabbing = true;
+        const { Body } = Phaser.Physics.Matter.Matter;
+        // console.log(this.grab.gameObject);
+        this.grab.gameObject.ignoreGravity = true;
+        Body.setPosition(this.grab.gameObject, { x: this.sprite.getCenter().x, y: this.sprite.getCenter().y - 80 });
+      }
+    } else {
+      if (this.grab.isGrabbing) {
+        console.log('here');
+        this.grab.gameObject.ignoreGravity = false;
+        this.grab.isGrabbing = false;
+      }
+      
     }
-    const sensors = [this.sensors.bottom, this.sensors.left, this.sensors.right];
-    this.scene.matterCollision.removeOnCollideStart({ objectA: sensors });
-    this.scene.matterCollision.removeOnCollideActive({ objectA: sensors });
-    if (this.jumpCooldownTimer) this.jumpCooldownTimer.destroy();
-
-    this.destroyed = true;
-    this.sprite.destroy();
   }
+
+destroy() {
+  // Clean up any listeners that might trigger events after the player is officially destroyed
+  this.scene.events.off("update", this.update, this);
+  this.scene.events.off("shutdown", this.destroy, this);
+  this.scene.events.off("destroy", this.destroy, this);
+  if (this.scene.matter.world) {
+    this.scene.matter.world.off("beforeupdate", this.resetTouching, this);
+  }
+  const sensors = [this.sensors.bottom, this.sensors.left, this.sensors.right];
+  this.scene.matterCollision.removeOnCollideStart({ objectA: sensors });
+  this.scene.matterCollision.removeOnCollideActive({ objectA: sensors });
+  if (this.jumpCooldownTimer) this.jumpCooldownTimer.destroy();
+
+  this.destroyed = true;
+  this.sprite.destroy();
+}
 }
