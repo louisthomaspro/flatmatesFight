@@ -1,27 +1,33 @@
 {
-  "name": "phaser-3-tilemap-blog-posts",
+  "name": "flatmatesfighter",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "serve": "browser-sync start --watch --server",
-    "dev": "npm run serve",
-    "prettier": "prettier examples/**/*.{js,css,html} --write",
-    "deploy": "gh-pages --branch gh-pages --dist examples"
-  },
-  "prettier": {
-    "printWidth": 100
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "devDependencies": {
-    "browser-sync": "^2.26.7",
-    "prettier": "^1.16.4"
-  },
   "dependencies": {
-    "gh-pages": "^2.0.1",
-    "phaser": "^3.21.0",
+    "browser-sync": "^2.26.7",
+    "matter-js": "^0.14.2",
     "phaser-matter-collision-plugin": "^0.10.2"
-  }
+  },
+  "devDependencies": {
+    "live-server": "^1.2.1",
+    "phaser": "^3.21.0",
+    "ts-loader": "^6.2.1",
+    "typescript": "^3.7.3",
+    "webpack": "^4.41.2",
+    "webpack-cli": "^3.3.10"
+  },
+  "scripts": {
+    "build": "webpack",
+    "start": "webpack --watch & live-server --port=8085"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/louisthomaspro/flatmatesFighter.git"
+  },
+  "author": "Louis THOMAS",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/louisthomaspro/flatmatesFighter/issues"
+  },
+  "homepage": "https://github.com/louisthomaspro/flatmatesFighter#readme"
 }
