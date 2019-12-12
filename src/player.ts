@@ -1,15 +1,14 @@
 import MultiKey from "./multi-key";
 import Grab from "./grab";
-import * as MatterJS from "matter-js";
-import { MainScene } from "./main-scene";
+import MainScene from "./main-scene";
 
-export class Player {
+export default class Player {
 
   scene : MainScene;
-  direction : boolean;
+  direction : boolean; // false=>left, true=>right
   sprite : Phaser.Physics.Matter.Sprite;
-  sensors : any;
-  grab : Grab;
+  sensors : any; // left,right,bottom sensors
+  grab : Grab; // grab sensor
   isTouching : { left: boolean, right: boolean, ground: boolean };
   canJump : boolean;
   jumpCooldownTimer : any;
@@ -75,7 +74,6 @@ export class Player {
     const Matter = Phaser.Physics.Matter.Matter;
 
     const { width: w, height: h } = this.sprite;
-    console.log(w + ":" + h);
     const mainBody = Matter.Bodies.rectangle(0, 0, 20, h, { chamfer: { radius: 10 } });
     this.sensors = {
       bottom: Matter.Bodies.rectangle(0, h * 0.5, w * 0.25, 2, { isSensor: true }),
@@ -162,7 +160,6 @@ export class Player {
   }
 
   initPad(pad : any) {
-    console.log('Init pad for player')
     this.pad = pad;
   }
 
@@ -254,24 +251,11 @@ export class Player {
       sprite.anims.stop();
       sprite.setTexture("player", 10);
     }
-
+    
     if (isGrabKeyDown) {
-      this.grab.gameObject.gameObject;
-      if (this.grab.gameObject.gameObject && !this.grab.isGrabbing) { // si un object est dispo
-        this.grab.isGrabbing = true;
-        // @ts-ignore
-        const { Body } = Phaser.Physics.Matter.Matter;
-        // console.log(this.grab.gameObject);
-        this.grab.gameObject.ignoreGravity = true;
-        Body.setPosition(this.grab.gameObject, { x: this.sprite.getCenter().x, y: this.sprite.getCenter().y - 80 });
-      }
+      this.grab.keyDown();
     } else {
-      if (this.grab.isGrabbing) {
-        console.log('here');
-        this.grab.gameObject.ignoreGravity = false;
-        this.grab.isGrabbing = false;
-      }
-      
+      this.grab.keyUp();     
     }
   }
 

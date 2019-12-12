@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-import { MainScene } from "./main-scene";
+import MainScene from "./main-scene";
 import PhaserMatterCollisionPlugin from "phaser-matter-collision-plugin";
 
 
@@ -35,4 +35,4 @@ const config = {
       }
   };
 
-  var game = new Phaser.Game(config);
+  let game = new Phaser.Game(config);

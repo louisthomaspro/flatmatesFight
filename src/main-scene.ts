@@ -1,8 +1,7 @@
-import { Player } from "./player";
-import { RotatingPlatform } from "./rotating-platform";
-import PhaserMatterCollisionPlugin from "phaser-matter-collision-plugin";
+import Player from "./player";
+import RotatingPlatform from "./rotating-platform";
 
-export class MainScene extends Phaser.Scene {
+export default class MainScene extends Phaser.Scene {
 
   player1: Player;
   player2: Player;
@@ -10,23 +9,19 @@ export class MainScene extends Phaser.Scene {
   matterCollision: any;
   unsubscribePlayerCollide: any;
   unsubscribeCelebrate: any;
-  public salut : any;
 
+
+  
   preload() {
-    // this.load.scenePlugin("matterCollision", PhaserMatterCollisionPlugin);
 
-    this.load.tilemapTiledJSON("map", "../assets/tilemaps/level.json");
-    this.load.image(
-      "kenney-tileset-64px-extruded",
-      "../assets/tilesets/kenney-tileset-64px-extruded.png"
-    );
+    this.load.tilemapTiledJSON("map", "../assets/tilemaps/level.json"); // tilemap
+    this.load.image("kenney-tileset-64px-extruded", "../assets/tilesets/kenney-tileset-64px-extruded.png"); // tileset
 
-    this.load.image("wooden-plank", "../assets/images/wooden-plank.png");
-    this.load.image("block", "../assets/images/block.png");
+    this.load.image("wooden-plank", "../assets/images/wooden-plank.png"); // wooden-plank
+    this.load.image("block", "../assets/images/block.png"); // block
 
-    this.load.spritesheet(
-      "player",
-      "../assets/spritesheets/0x72-industrial-player-32px-extruded.png",
+    // player sprite
+    this.load.spritesheet("player", "../assets/spritesheets/0x72-industrial-player-32px-extruded.png",
       {
         frameWidth: 32,
         frameHeight: 32,
@@ -34,21 +29,14 @@ export class MainScene extends Phaser.Scene {
         spacing: 2
       }
     );
-    
-    this.load.atlas("emoji", "../assets/atlases/emoji.png", "../assets/atlases/emoji.json");
 
-    // this.load.scenePlugin({
-    //   key: 'matterCollision',
-    //   url: '../node_modules/phaser-matter-collision-plugin/dist/phaser-matter-collision-plugin.js',
-    //   sceneKey: 'matterCollision'
-    // });    
+    this.load.atlas("emoji", "../assets/atlases/emoji.png", "../assets/atlases/emoji.json"); // emoji + collision with PhysicsEditor   
 
   }
 
+
   create() {
-    // this.matterCollision = PhaserMatterCollisionPlugin;
-    // console.log(this.plugins.get('matterCollision'));
-    // console.log(this.matterCollision);
+
     const map = this.make.tilemap({ key: "map" });
     const tileset = map.addTilesetImage("kenney-tileset-64px-extruded");
     const groundLayer = map.createDynamicLayer("Ground", tileset, 0, 0);
@@ -70,32 +58,25 @@ export class MainScene extends Phaser.Scene {
     this.matter.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
     // The spawn point is set using a point object inside of Tiled (within the "Spawn" object layer)
-
-    const { x, y } = map.findObject("Spawn", obj => obj.name === "Spawn Point") as any;
-
+    // @ts-ignore
+    const { x, y } = map.findObject("Spawn", obj => obj.name === "Spawn Point");
     const { LEFT, RIGHT, UP, Q, D, Z, A, CTRL } = Phaser.Input.Keyboard.KeyCodes;
 
-    // Smoothly follow the player
-    // this.cameras.main.startFollow(this.player.sprite, false, 0.5, 0.5);
-
-    this.player1 = new Player(this, x + 30, y, LEFT, RIGHT, UP, CTRL);
+    this.player1 = new Player(this, x + 50, y, LEFT, RIGHT, UP, CTRL);
     this.player2 = new Player(this, x, y, Q, D, Z, A);
 
 
+    // Functions that remove collision listeners
     this.unsubscribePlayerCollide = this.matterCollision.addOnCollideStart({
       objectA: this.player1.sprite,
       callback: this.onPlayerCollide,
       context: this
     });
-
     this.unsubscribePlayerCollide = this.matterCollision.addOnCollideStart({
       objectA: this.player2.sprite,
       callback: this.onPlayerCollide,
       context: this
     });
-
-
-    
 
 
     // Load up some crates from the "Crates" object layer created in Tiled
@@ -106,7 +87,7 @@ export class MainScene extends Phaser.Scene {
       this.matter.add
         .image(x + width / 2, y - height / 2, "block")
         .setBody({ shape: "rectangle", density: 0.001 }, null)
-        .setData('name', "coucou");
+        .setData("name", "crate");
     });
 
     // Create platforms at the point locations in the "Platform Locations" layer created in Tiled
@@ -133,7 +114,7 @@ export class MainScene extends Phaser.Scene {
       context: this
     });
 
-    const help = this.add.text(16, 16, "Arrows/WASD to move the player.", {
+    const help = this.add.text(16, 16, "Arrows/QSDZ to move the player.", {
       fontSize: "18px",
       padding: { x: 10, y: 5 },
       backgroundColor: "#ffffff",
@@ -141,24 +122,28 @@ export class MainScene extends Phaser.Scene {
     });
     help.setScrollFactor(0).setDepth(1000);
 
-
-    this.input.gamepad.once('down', function (pad : any) {
-      console.log('Playing with ' + pad.id);
-      if (!this.player1.isPadExist()) {
-        this.player1.initPad(pad);
-        return;
-      }
-      if (!this.player2.isPadExist()) {
-        this.player2.initPad(pad);
-        return;
-      }
-
-    }, this);
+    // When gamepad is connected
+    this.input.gamepad.addListener('connected', this.linkGamepad, this);
 
   }
 
-  // @ts-ignore
-  onPlayerCollide({ gameObjectB }) {
+
+  // Link gamepad to a player
+  linkGamepad(pad: any) {
+    console.log('Gamepad connected : ' + pad.id);
+    if (!this.player1.isPadExist()) {
+      this.player1.initPad(pad);
+      return;
+    }
+    if (!this.player2.isPadExist()) {
+      this.player2.initPad(pad);
+      return;
+    }
+  }
+
+
+
+  onPlayerCollide({ gameObjectB } : any) {
     if (!gameObjectB || !(gameObjectB instanceof Phaser.Tilemaps.Tile)) return;
 
     const tile = gameObjectB;
@@ -175,6 +160,7 @@ export class MainScene extends Phaser.Scene {
       cam.once("camerafadeoutcomplete", () => this.scene.restart());
     }
   }
+
 
   onPlayerWin() {
     // Celebrate only once
@@ -194,4 +180,6 @@ export class MainScene extends Phaser.Scene {
         .setScale(0.5);
     }
   }
+
+
 }

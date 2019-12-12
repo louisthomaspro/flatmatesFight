@@ -1,6 +1,6 @@
 
 
-export class RotatingPlatform {
+export default class RotatingPlatform {
 
   constructor(scene: Phaser.Scene, x: number, y: number, numTiles: number = 5) {
     // A TileSprite is a Sprite whose texture repeats to fill the given width and height. We can use
