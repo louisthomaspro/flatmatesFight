@@ -10,6 +10,7 @@ export default class MainScene extends Phaser.Scene {
   unsubscribePlayerCollide: any;
   unsubscribeCelebrate: any;
 
+  debugText: Phaser.GameObjects.Text;
 
   
   preload() {
@@ -114,16 +115,19 @@ export default class MainScene extends Phaser.Scene {
       context: this
     });
 
-    const help = this.add.text(16, 16, "Arrows/QSDZ to move the player.", {
-      fontSize: "18px",
-      padding: { x: 10, y: 5 },
-      backgroundColor: "#ffffff",
-      fill: "#000000"
-    });
-    help.setScrollFactor(0).setDepth(1000);
+    // const help = this.add.text(16, 16, "Arrows/QSDZ to move the player.", {
+    //   fontSize: "18px",
+    //   padding: { x: 10, y: 5 },
+    //   backgroundColor: "#ffffff",
+    //   fill: "#000000"
+    // });
+    // help.setScrollFactor(0).setDepth(1000);
 
     // When gamepad is connected
     this.input.gamepad.addListener('connected', this.linkGamepad, this);
+
+    // Debug text
+    this.debugText = this.add.text(10, 30, '', { font: '16px Courier', fill: '#ffffff' });
 
   }
 
