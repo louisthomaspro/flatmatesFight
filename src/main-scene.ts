@@ -12,7 +12,8 @@ export default class MainScene extends Phaser.Scene {
 
   debugText: Phaser.GameObjects.Text;
 
-  
+
+
   preload() {
 
     this.load.tilemapTiledJSON("map", "../assets/tilemaps/level.json"); // tilemap
@@ -66,6 +67,8 @@ export default class MainScene extends Phaser.Scene {
     this.player1 = new Player(this, x + 50, y, LEFT, RIGHT, UP, CTRL);
     this.player2 = new Player(this, x, y, Q, D, Z, A);
 
+    this.player1.sprite.setCollisionGroup(-1);
+
 
     // Functions that remove collision listeners
     this.unsubscribePlayerCollide = this.matterCollision.addOnCollideStart({
@@ -85,10 +88,8 @@ export default class MainScene extends Phaser.Scene {
       const { x, y, width, height } = crateObject;
 
       // Tiled origin for coordinate system is (0, 1), but we want (0.5, 0.5)
-      this.matter.add
-        .image(x + width / 2, y - height / 2, "block")
-        .setBody({ shape: "rectangle", density: 0.001 }, null)
-        .setData("name", "crate");
+      this.matter.add.image(x + width / 2, y - height / 2, "block", null, { label: "crate" });
+      // .setBody({ shape: "rectangle", density: 0.001}, null) as any;
     });
 
     // Create platforms at the point locations in the "Platform Locations" layer created in Tiled
@@ -184,6 +185,7 @@ export default class MainScene extends Phaser.Scene {
         .setScale(0.5);
     }
   }
+  
 
 
 }

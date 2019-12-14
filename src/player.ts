@@ -26,7 +26,7 @@ export default class Player {
 
   constructor(scene : MainScene, x : number, y : number, leftKey : number, rightKey : number, upKey : number, grabKey : number) {
     this.scene = scene;
-
+    
     this.direction = false; // false: left; right: true
 
 
@@ -93,7 +93,6 @@ export default class Player {
 
     this.grab = new Grab(this, scene);
 
-    // scene.matter.add.rectangle(0,0,32,32, {isSensor: true, isStatic: true});
 
     // Track which sensors are touching something
     this.isTouching = { left: false, right: false, ground: false };
@@ -184,7 +183,6 @@ export default class Player {
   }
 
   update() {
-    this.grab.update();
     if (this.destroyed) return;
 
 
@@ -252,11 +250,10 @@ export default class Player {
       sprite.setTexture("player", 10);
     }
     
-    if (isGrabKeyDown) {
-      this.grab.keyDown();
-    } else {
-      this.grab.keyUp();     
-    }
+    this.grab.updateBodyDirection(this.direction);
+    this.grab.grabbingAction(isGrabKeyDown);
+
+    // this.pear.updateBodyDirection(this.direction);
   }
 
 destroy() {
