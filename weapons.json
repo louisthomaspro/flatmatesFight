@@ -1,0 +1,58 @@
+{
+	"generator_info": "Shape definitions generated with PhysicsEditor. Visit https://www.codeandweb.com/physicseditor",
+	"axe": {
+		"type": "fromPhysicsEditor",
+		"label": "axe",
+		"isStatic": false,
+		"density": 0,
+		"restitution": 0,
+		"friction": 0.1,
+		"frictionAir": 0.01,
+		"frictionStatic": 0.5,
+		"collisionFilter": {
+			"group": 0,
+			"category": 1,
+			"mask": 1
+		},
+		"fixtures": [
+			{
+				"label": "axe",
+				"isSensor": false,
+				"vertices": [
+					[ { "x":120, "y":0 }, { "x":101, "y":11 }, { "x":63, "y":37 }, { "x":75, "y":51 }, { "x":105, "y":53 }, { "x":120, "y":18 } ],
+					[ { "x":77, "y":76 }, { "x":105, "y":53 }, { "x":75, "y":51 } ],
+					[ { "x":4, "y":118 }, { "x":17, "y":113 }, { "x":40, "y":68 }, { "x":47, "y":25 }, { "x":5, "y":92 } ],
+					[ { "x":52, "y":3 }, { "x":47, "y":25 }, { "x":63, "y":37 }, { "x":101, "y":11 } ],
+					[ { "x":40, "y":68 }, { "x":63, "y":37 }, { "x":47, "y":25 } ]
+				]
+			}
+		]
+	},
+	"banana": {
+		"type": "fromPhysicsEditor",
+		"label": "banana",
+		"isStatic": false,
+		"density": 0.1,
+		"restitution": 0,
+		"friction": 0.10000000149011612,
+		"frictionAir": 0.009999999776482582,
+		"frictionStatic": 0.5,
+		"collisionFilter": {
+			"group": 0,
+			"category": 1,
+			"mask": 255
+		},
+		"fixtures": [
+			{
+				"label": "banana",
+				"isSensor": false,
+				"vertices": [
+					[ { "x":106, "y":0 }, { "x":89, "y":6 }, { "x":105, "y":22 } ],
+					[ { "x":3, "y":93 }, { "x":3, "y":108 }, { "x":45, "y":128 }, { "x":27, "y":93 } ],
+					[ { "x":27, "y":93 }, { "x":45, "y":128 }, { "x":76, "y":125 }, { "x":109, "y":104 }, { "x":126, "y":66 }, { "x":79, "y":69 } ],
+					[ { "x":79, "y":69 }, { "x":126, "y":66 }, { "x":124, "y":45 }, { "x":105, "y":22 }, { "x":89, "y":6 } ]
+				]
+			}
+		]
+	}
+}
