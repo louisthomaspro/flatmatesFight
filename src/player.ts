@@ -71,23 +71,28 @@ export default class Player {
     // player is blocked by a wall or standing on the ground.
 
     // @ts-ignore: Property 'Matter' does not exist on type 'typeof Matter'.
-    const Matter = Phaser.Physics.Matter.Matter;
+    const { Bodies, Body, Constraint} = Phaser.Physics.Matter.Matter;
 
     const { width: w, height: h } = this.sprite;
-    const mainBody = Matter.Bodies.rectangle(0, 0, 20, h, { chamfer: { radius: 10 } });
+    const mainBody = Bodies.rectangle(0, 0, 20, h, { chamfer: { radius: 10 } });
+
+
     this.sensors = {
-      bottom: Matter.Bodies.rectangle(0, h * 0.5, w * 0.25, 2, { isSensor: true }),
-      left: Matter.Bodies.rectangle(-w * 0.35, 0, 2, h * 0.5, { isSensor: true }),
-      right: Matter.Bodies.rectangle(w * 0.35, 0, 2, h * 0.5, { isSensor: true })
+      bottom: Bodies.rectangle(0, h * 0.5, w * 0.25, 2, { isSensor: true }),
+      left: Bodies.rectangle(-w * 0.35, 0, 2, h * 0.5, { isSensor: true }),
+      right: Bodies.rectangle(w * 0.35, 0, 2, h * 0.5, { isSensor: true })
     };
-    const compoundBody = Matter.Body.create({
+    const compoundBody = Body.create({
       parts: [mainBody, this.sensors.bottom, this.sensors.left, this.sensors.right],
       frictionStatic: 0,
       frictionAir: 0.02,
       friction: 0.1
     });
+
+
+
     this.sprite.setExistingBody(compoundBody);
-    this.sprite.setScale(2)
+    this.sprite.setScale(2);
     this.sprite.setFixedRotation() // Sets inertia to infinity so the player can't rotate
     this.sprite.setPosition(x, y);
 

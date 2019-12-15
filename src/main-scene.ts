@@ -1,5 +1,6 @@
 import Player from "./player";
 import RotatingPlatform from "./rotating-platform";
+import Axe from "./axe";
 
 export default class MainScene extends Phaser.Scene {
 
@@ -34,10 +35,17 @@ export default class MainScene extends Phaser.Scene {
 
     this.load.atlas("emoji", "../assets/atlases/emoji.png", "../assets/atlases/emoji.json"); // emoji + collision with PhysicsEditor   
 
+
+    this.load.image("axe", "../assets/axe.png"); // axe
+
+    // Load body shapes from JSON file generated using PhysicsEditor
+    this.load.json('weapons-shapes', '../weapons.json');
+
   }
 
 
   create() {
+
 
     const map = this.make.tilemap({ key: "map" });
     const tileset = map.addTilesetImage("kenney-tileset-64px-extruded");
@@ -67,6 +75,8 @@ export default class MainScene extends Phaser.Scene {
     this.player1 = new Player(this, x + 50, y, LEFT, RIGHT, UP, CTRL);
     this.player2 = new Player(this, x, y, Q, D, Z, A);
 
+    let axe1 = new Axe(this);
+
     this.player1.sprite.setCollisionGroup(-1);
 
 
@@ -88,7 +98,7 @@ export default class MainScene extends Phaser.Scene {
       const { x, y, width, height } = crateObject;
 
       // Tiled origin for coordinate system is (0, 1), but we want (0.5, 0.5)
-      this.matter.add.image(x + width / 2, y - height / 2, "block", null, { label: "crate" });
+      this.matter.add.image(x + width / 2, y - height / 2, "block", null, { label: "crate", friction: 0.05});
       // .setBody({ shape: "rectangle", density: 0.001}, null) as any;
     });
 
@@ -109,12 +119,12 @@ export default class MainScene extends Phaser.Scene {
         isStatic: true // It shouldn't move
       }
     );
-    this.unsubscribeCelebrate = this.matterCollision.addOnCollideStart({
-      objectA: this.player1.sprite,
-      objectB: celebrateSensor,
-      callback: this.onPlayerWin,
-      context: this
-    });
+    // this.unsubscribeCelebrate = this.matterCollision.addOnCollideStart({
+    //   objectA: this.player1.sprite,
+    //   objectB: celebrateSensor,
+    //   callback: this.onPlayerWin,
+    //   context: this
+    // });
 
     // const help = this.add.text(16, 16, "Arrows/QSDZ to move the player.", {
     //   fontSize: "18px",
@@ -128,7 +138,8 @@ export default class MainScene extends Phaser.Scene {
     this.input.gamepad.addListener('connected', this.linkGamepad, this);
 
     // Debug text
-    this.debugText = this.add.text(10, 30, '', { font: '16px Courier', fill: '#ffffff' });
+    this.debugText = this.add.text(10, 10, '', { font: '16px Courier', fill: '#ffffff' });
+
 
   }
 
@@ -184,6 +195,11 @@ export default class MainScene extends Phaser.Scene {
         })
         .setScale(0.5);
     }
+  }
+
+
+  update() {
+    this.debugText.setText(this.game.loop.actualFps.toPrecision(4).toString());
   }
   
 

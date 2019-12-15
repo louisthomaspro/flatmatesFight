@@ -2,6 +2,10 @@ import Player from "./player";
 import MainScene from "./main-scene";
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
+const BODY_CAUGHT_HEIGHT = 65;
+const BODY_SPEED = 0.3; // default : 0.2
+
+const INTERACT_WITH: string[] = ["axe", "crate"];
 
 export default class Grab {
 
@@ -44,15 +48,16 @@ export default class Grab {
 
     onSensorCollide({ bodyA, bodyB, pair }: any) {
         if (bodyB.isSensor) return;
-        if (bodyB.label != "crate") return;
+        if (!INTERACT_WITH.includes(bodyB.label)) return;
         bodyB.gameObject.setAlpha(0.5, 0.5, 0.5, 0.5);
 
         this.bodiesColliding.push(bodyB);
+        // console.log(this.bodiesColliding)
     }
 
     onSensorEnd({ bodyA, bodyB, pair }: any) {
         if (!bodyB.gameObject) return;
-        if (bodyB.isSensor || (bodyB.label != "crate")) return;
+        if (!INTERACT_WITH.includes(bodyB.label)) return;
         bodyB.gameObject.setAlpha(1, 1, 1, 1);
 
         // @ts-ignore
@@ -66,18 +71,18 @@ export default class Grab {
 
         if (isGrabKeyDown) {
 
-            if (!this.bodyCaught && this.canCatch) { // nothing caught, let's catch it
+            if (!this.bodyCaught && this.canCatch) { // CATCH
                 if (this.bodiesColliding.length == 0) return; // be sure that something is colliding
                 this.bodyCaught = this.bodiesColliding[0];
                 const bodyCaught = this.bodyCaught as any;
-                bodyCaught.ignoreGravity = true;
+                bodyCaught.ignoreGravity = true;                
                 bodyCaught.gameObject.setCollisionGroup(-1);
 
-            } else if (this.bodyCaught) { // Catching the object
+
+            } else if (this.bodyCaught) { // CATCHING
                 // @ts-ignore
-                const { Body } = Phaser.Physics.Matter.Matter;
-                Body.setPosition(this.bodyCaught, { x: this.player.sprite.getCenter().x, y: this.player.sprite.getCenter().y - 80, angle: -35 });
-            }
+                this.attractVelocity(this.player.sprite.body, this.bodyCaught.gameObject.body);
+            }   
 
         } else {
 
@@ -88,20 +93,43 @@ export default class Grab {
                 bodyCaught.gameObject.setAngularVelocity(0.05);
                 this.bodyCaught = null;
                 bodyCaught.ignoreGravity = false;
-                bodyCaught.gameObject.setCollisionGroup(0);
 
-                // this.catchCooldownTimer = this.scene.time.addEvent({
-                //     delay: 1000,
-                //     callback: () => {
-                //         this.canCatch = true;
-                //     }
-                // });
-
+                this.catchCooldownTimer = this.scene.time.addEvent({
+                    delay: 100,
+                    callback: () => {
+                        bodyCaught.gameObject.setCollisionGroup(0);
+                    }
+                });
 
             }
 
-
         }
+    }
+
+    attract(bodyA: any, bodyB: any) {
+        let power = 1e-2;
+        let positive = true;
+        var force = {
+            x: (bodyA.position.x - bodyB.position.x) * power * (positive ? 1 : -1),
+            y: (bodyA.position.y - bodyB.position.y - BODY_CAUGHT_HEIGHT) * power * (positive ? 1 : -1),
+        };
+
+        // @ts-ignore
+        const { Body } = Phaser.Physics.Matter.Matter;
+        Body.applyForce(bodyB, bodyB.position, force);
+    }
+
+
+    attractVelocity(bodyA: any, bodyB: any) {
+        let positive = true;
+        var velocity = {
+            x: (bodyA.position.x - bodyB.position.x) * BODY_SPEED * (positive ? 1 : -1),
+            y: (bodyA.position.y - bodyB.position.y - BODY_CAUGHT_HEIGHT) * BODY_SPEED * (positive ? 1 : -1),
+        };
+
+        // @ts-ignore
+        const { Body } = Phaser.Physics.Matter.Matter;        
+        Body.setVelocity(bodyB, velocity);
     }
 
 
