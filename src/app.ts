@@ -1,13 +1,13 @@
-import Phaser from "phaser";
+import Phaser from "phaser"
 
-import MainScene from "./main-scene";
-import PhaserMatterCollisionPlugin from "phaser-matter-collision-plugin";
+import MainScene from "./main-scene"
+import PhaserMatterCollisionPlugin from "phaser-matter-collision-plugin"
 
 
 const config = {
     type: Phaser.AUTO,
     width: 1280,
-    height: 720,
+    height: 768,
     input: {
       gamepad: true
     },
@@ -21,7 +21,7 @@ const config = {
         // gravity: {
         //   y: 1
         // },
-        debug: true
+        // debug: true
       }
     },
     plugins: {
@@ -33,6 +33,6 @@ const config = {
           }
         ]
       }
-  };
+  }
 
-  let game = new Phaser.Game(config);
+  let game = new Phaser.Game(config)
