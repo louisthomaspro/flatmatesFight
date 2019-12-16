@@ -18,6 +18,8 @@ export default class MainScene extends Phaser.Scene {
   x_default: number
   y_default: number
 
+  gamepadIndex: Player[] // [2] is linked to a player
+
 
 
   preload() {
@@ -45,7 +47,7 @@ export default class MainScene extends Phaser.Scene {
 
     // Load body shapes from JSON file generated using PhysicsEditor
     this.load.json('weapons-shapes', '../weapons.json')
-
+    
   }
 
 
@@ -136,12 +138,15 @@ export default class MainScene extends Phaser.Scene {
     // help.setScrollFactor(0).setDepth(1000)
 
     // When gamepad is connected
-    this.input.gamepad.addListener('connected', this.linkGamepad, this)
+    this.input.gamepad.on('connected', this.linkGamepad, this)
+    this.input.gamepad.on('disconnected', this.unlinkGamepad, this)
+    
 
     // Debug text
     this.fpsText = this.add.text(this.cameras.main.width -60, 10, '', { font: '16px Courier', fill: '#ffffff' })
     this.scoreText = this.add.text(10, 10, '', { font: '16px Courier', fill: '#ffffff' })
 
+    this.gamepadIndex = [];
 
   }
 
@@ -151,16 +156,22 @@ export default class MainScene extends Phaser.Scene {
     console.log('Gamepad connected : ' + pad.id)
     if (!this.players[0].isPadExist()) {
       this.players[0].initPad(pad)
+      this.gamepadIndex[pad.index] = this.players[0]
       return
     }
     const newPlayer = new Player(this, this.x_default, this.y_default)
     newPlayer.initPad(pad)
     this.players.push(newPlayer)
+    this.gamepadIndex[pad.index] = newPlayer
+  }
+
+  unlinkGamepad(pad: any) {
+    console.log("pad unlinked : destroying player")
+    this.gamepadIndex[pad.index].destroy()
+    this.gamepadIndex[pad.index] = null
   }
 
 
-
-  
 
 
   // onPlayerWin() {
