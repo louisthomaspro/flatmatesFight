@@ -1,6 +1,7 @@
 import MultiKey from "./multi-key"
 import Grab from "./grab"
 import MainScene from "./main-scene"
+import Gamepad from "./gamepad"
 
 export default class Player {
 
@@ -21,7 +22,7 @@ export default class Player {
   destroyed: boolean
   unsubscribePlayerCollide: any
 
-  pad: any
+  gamepad: Gamepad
 
   life: integer = 3
 
@@ -34,6 +35,7 @@ export default class Player {
 
     this.direction = true // false: left right: true
 
+    this.gamepad = new Gamepad()
 
     // Create the animations we need from the player spritesheet
     const anims = scene.anims
@@ -195,30 +197,6 @@ export default class Player {
     this.sprite.setStatic(true)
   }
 
-  initPad(pad: any) {
-    this.pad = pad
-  }
-
-  joystickRight() {
-    return (this.pad && this.pad.leftStick.x > 0.75)
-  }
-
-  joystickLeft() {
-    return (this.pad && this.pad.leftStick.x < -0.75)
-  }
-
-  buttonA() {
-    return (this.pad && this.pad.A)
-  }
-
-  buttonB() {
-    return (this.pad && this.pad.B)
-  }
-
-  isPadExist() {
-    return (this.pad ? true : false)
-  }
-
   update() {
     if (this.destroyed) return
     if (this.sprite.y > this.scene.cameras.main.height) {
@@ -231,10 +209,10 @@ export default class Player {
     const body = sprite.body as any
     const velocity = body.velocity
 
-    const isRightKeyDown = this.rightInput.isDown() || this.joystickRight()
-    const isLeftKeyDown = this.leftInput.isDown() || this.joystickLeft()
-    const isJumpKeyDown = this.jumpInput.isDown() || this.buttonA()
-    const isGrabKeyDown = this.grabInput.isDown() || this.buttonB()
+    const isRightKeyDown = this.rightInput.isDown() || this.gamepad.joystickRight()
+    const isLeftKeyDown = this.leftInput.isDown() || this.gamepad.joystickLeft()
+    const isJumpKeyDown = this.jumpInput.isDown() || this.gamepad.buttonA()
+    const isGrabKeyDown = this.grabInput.isDown() || this.gamepad.buttonX()
     const isOnGround = this.isTouching.ground
     const isInAir = !isOnGround
 
@@ -309,6 +287,8 @@ export default class Player {
     this.scene.matterCollision.removeOnCollideActive({ objectA: sensors })
     if (this.jumpCooldownTimer) this.jumpCooldownTimer.destroy()
 
+    this.grab.destroy()
+
     this.destroyed = true
     this.sprite.destroy()
   }
@@ -316,6 +296,7 @@ export default class Player {
   kill() {
     if (this.dead) return;
     console.log("RIP")
+    this.grab.bodyCaught = null
     this.life--
     this.dead = true;
     this.scene.time.addEvent({

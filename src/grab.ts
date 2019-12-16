@@ -185,6 +185,11 @@ export default class Grab {
     }
 
     destroy() {
+
+        this.scene.events.off("destroy", this.destroy, this)
+        this.scene.matterCollision.removeOnCollideStart({ objectA: this.grabSensor })
+        this.scene.matterCollision.removeOnCollideActive({ objectA: this.grabSensor })
+
     }
 
 }
