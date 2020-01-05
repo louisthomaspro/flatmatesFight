@@ -14,10 +14,20 @@ export default class Player {
   canJump: boolean
   jumpCooldownTimer: any
 
+  canDash: boolean
+  isDashing: boolean
+  velocityDashing: { x: number, y: number }
+
+  dashCooldownTimer: any
+  dashDurationTimer: any
+
   leftInput: MultiKey
   rightInput: MultiKey
+  upInput: MultiKey
+  downInput: MultiKey
   jumpInput: MultiKey
   grabInput: MultiKey
+  dashInput: MultiKey
 
   destroyed: boolean
   unsubscribePlayerCollide: any
@@ -30,7 +40,7 @@ export default class Player {
 
 
 
-  constructor(scene: MainScene, x: number, y: number, leftKey?: number, rightKey?: number, upKey?: number, grabKey?: number) {
+  constructor(scene: MainScene, x: number, y: number) {
     this.scene = scene
 
     this.direction = true // false: left right: true
@@ -96,7 +106,7 @@ export default class Player {
       friction: 0.1
     })
 
-
+    this.canDash = true
 
     this.sprite.setExistingBody(compoundBody)
     this.sprite.setScale(2)
@@ -129,11 +139,16 @@ export default class Player {
 
     this.subscribePlayerCollide()
 
+    const { LEFT, RIGHT, DOWN, UP, E, Z, A, CTRL } = Phaser.Input.Keyboard.KeyCodes
+
     // Track the keys
-    this.leftInput = new MultiKey(scene, [leftKey])
-    this.rightInput = new MultiKey(scene, [rightKey])
-    this.jumpInput = new MultiKey(scene, [upKey])
-    this.grabInput = new MultiKey(scene, [grabKey])
+    this.leftInput = new MultiKey(scene, [LEFT])
+    this.rightInput = new MultiKey(scene, [RIGHT])
+    this.upInput = new MultiKey(scene, [UP])
+    this.downInput = new MultiKey(scene, [DOWN])
+    this.jumpInput = new MultiKey(scene, [UP, A])
+    this.grabInput = new MultiKey(scene, [CTRL, E])
+    this.dashInput = new MultiKey(scene, [Z])
 
     this.destroyed = false
     this.scene.events.on("update", this.update, this)
@@ -212,7 +227,10 @@ export default class Player {
     const isRightKeyDown = this.rightInput.isDown() || this.gamepad.joystickRight()
     const isLeftKeyDown = this.leftInput.isDown() || this.gamepad.joystickLeft()
     const isJumpKeyDown = this.jumpInput.isDown() || this.gamepad.buttonA()
+    const isUpKeyDown = this.upInput.isDown() || this.gamepad.buttonA()
+    const isDownKeyDown = this.downInput.isDown() || this.gamepad.buttonA()
     const isGrabKeyDown = this.grabInput.isDown() || this.gamepad.buttonX()
+    const isDashKeyDown = this.dashInput.isDown() || this.gamepad.buttonX()
     const isOnGround = this.isTouching.ground
     const isInAir = !isOnGround
 
@@ -238,6 +256,7 @@ export default class Player {
         this.direction = true
       }
     }
+    
 
     // Limit horizontal speed, without this the player's velocity would just keep increasing to
     // absurd speeds. We don't want to touch the vertical velocity though, so that we don't
@@ -267,6 +286,45 @@ export default class Player {
       sprite.anims.stop()
       sprite.setTexture("player", 10)
     }
+
+
+
+    if (isDashKeyDown && this.canDash) {
+
+      this.canDash = false
+      this.isDashing = true
+
+      const force = 20
+
+      let xVelocity = 0
+      let yVelocity = 0
+
+      if (isRightKeyDown) xVelocity = force
+      if (isLeftKeyDown) xVelocity = -force
+      if (isUpKeyDown) yVelocity = -force
+      if (isDownKeyDown) yVelocity = force
+
+      this.velocityDashing = { x: xVelocity, y: yVelocity }
+
+
+      this.dashDurationTimer = this.scene.time.addEvent({
+        delay: 200,
+        callback: () => {
+          this.isDashing = false
+        }
+      })
+
+      this.dashCooldownTimer = this.scene.time.addEvent({
+        delay: 1000,
+        callback: () => (this.canDash = true)
+      })
+
+    }
+
+    if (this.isDashing) {
+      sprite.setVelocity(this.velocityDashing.x, this.velocityDashing.y)
+    }
+
 
     this.grab.updateBodyDirection(this.direction)
     this.grab.grabbingAction(isGrabKeyDown)
@@ -310,7 +368,7 @@ export default class Player {
   resurrect() {
     console.log("resurect")
     this.sprite.setPosition(this.scene.x_default, this.scene.y_default)
-    this.sprite.setVelocity(0,0)
+    this.sprite.setVelocity(0, 0)
     this.subscribePlayerCollide()
     this.dead = false;
   }

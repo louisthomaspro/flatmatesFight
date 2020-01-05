@@ -53,6 +53,10 @@ export default class Gamepad {
         return (this.pad && this.pad.axes[5].value == 1)
     }
 
+    joystickVelocity() {
+        return { x: 1, y: 1}
+    }
+
     destroy() {
     }
 

@@ -81,11 +81,9 @@ export default class MainScene extends Phaser.Scene {
     const { x, y } = map.findObject("Spawn", obj => obj.name === "Spawn Point")
     this.x_default = x
     this.y_default = y
-    const { LEFT, RIGHT, UP, Q, D, Z, A, CTRL } = Phaser.Input.Keyboard.KeyCodes
 
     this.players = []
-    this.players.push(new Player(this, x, y, LEFT, RIGHT, UP, CTRL))
-    // this.players.push(new Player(this, x, y, Q, D, Z, A))
+    this.players.push(new Player(this, x, y))
 
     // let axe1 = new Axe(this)
 
