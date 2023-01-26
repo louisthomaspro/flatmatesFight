@@ -14,7 +14,7 @@ export default class Axe {
         let weaponsShapes = scene.game.cache.json.get('weapons-shapes')
 
 
-        this.axe = scene.matter.add.sprite(400, 50, 'axe', null, {shape: weaponsShapes.axe, })
+        this.axe = scene.matter.add.sprite(400, 50, 'axe', null)
        
         
         this.axe.setCollisionGroup(-1)

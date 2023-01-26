@@ -56,10 +56,10 @@ export default class MainScene extends Phaser.Scene {
 
     const map = this.make.tilemap({ key: "map" })
     const tileset = map.addTilesetImage("kenney-tileset-64px-extruded")
-    const groundLayer = map.createDynamicLayer("Ground", tileset, 0, 0)
-    const lavaLayer = map.createDynamicLayer("Lava", tileset, 0, 0).setDepth(12)
-    map.createDynamicLayer("Background", tileset, 0, 0)
-    map.createDynamicLayer("Foreground", tileset, 0, 0).setDepth(10)
+    const groundLayer = map.createLayer("Ground", tileset, 0, 0)
+    const lavaLayer = map.createLayer("Lava", tileset, 0, 0).setDepth(12)
+    map.createLayer("Background", tileset, 0, 0)
+    map.createLayer("Foreground", tileset, 0, 0).setDepth(10)
 
     // Set colliding tiles before converting the layer to Matter bodies
     groundLayer.setCollisionByProperty({ collides: true })
@@ -141,8 +141,8 @@ export default class MainScene extends Phaser.Scene {
 
 
     // Debug text
-    this.fpsText = this.add.text(this.cameras.main.width - 60, 10, '', { font: '16px Courier', fill: '#ffffff' })
-    this.scoreText = this.add.text(10, 10, '', { font: '16px Courier', fill: '#ffffff' })
+    this.fpsText = this.add.text(this.cameras.main.width - 60, 10, '', { font: '16px Courier', color: '#ffffff' })
+    this.scoreText = this.add.text(10, 10, '', { font: '16px Courier', color: '#ffffff' })
     this.gamepadIndex = [];
 
   }
